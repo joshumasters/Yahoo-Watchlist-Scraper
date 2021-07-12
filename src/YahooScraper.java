@@ -22,11 +22,14 @@ public class YahooScraper {
         final String url = scan.nextLine();
         scan.close();
         try {
+            //Connects to URL
             final Document doc = Jsoup.connect(url).get();
+            //Grabs the table rows from the Watchlist
             final Elements rows = doc.select("table.cwl-symbols tr");
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();    
             final String title = dtf.format(now).toString() + " " + doc.select("title").text();
+            //Grabs data from each row and saves that data to a StockEntry object, and stores to an arraylist
             for (Element row : rows) {
                 Elements items = row.select("td");
                 if(items.size() > 0){
@@ -34,8 +37,9 @@ public class YahooScraper {
                     entries.add(entry);
                 }
             }
+            //Creates and formats spreadsheet headings
             Workbook book = new XSSFWorkbook();
-            Sheet sheet = book.createSheet("FightEntries");
+            Sheet sheet = book.createSheet("StockEntries");
             String[] headings = {"Symbol", "Company Name", "Last Price", "Change", "Change %", "Market Time", "Volume", "Average Volume(3 Month)", "Market Cap", "Date Pulled"};
             Row header = sheet.createRow(0);
             for (int i = 0; i < headings.length; i++) {
@@ -44,7 +48,6 @@ public class YahooScraper {
             }
             int rowNum = 1;
             //Adds each entry field to a workbook cell
-            
             boolean dateFlag = false;
             for(StockEntry entry : entries){
                 Row row = sheet.createRow(rowNum++);
